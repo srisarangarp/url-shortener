@@ -16,3 +16,4 @@ The output will look like this
 ```json
 {"shorten_URL":"https://infc.com/<shortened-url>"}
 ```
+infc.com is the assumed domain name here!!
