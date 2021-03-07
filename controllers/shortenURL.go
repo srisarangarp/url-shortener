@@ -30,9 +30,11 @@ func ShortenURL(c *gin.Context) {
 	indexValue := 0
 	var hashString string
 	for {
+
 		hashString = generateHashString(url, 0)
 		urlStoreObjectInverse, err := getObjectMap("urls-storage-inverse.yaml")
 
+		//In case of collision
 		if _, exists := lookForString(urlStoreObjectInverse, url); exists {
 			indexValue++
 			continue
@@ -63,8 +65,8 @@ func ShortenURL(c *gin.Context) {
 func generateHashString(str string, startIndex int) string {
 	data := []byte(str)
 	hash := sha256.Sum256(data)
-	if len(hash) >= 5 {
-		hashString := hex.EncodeToString(hash[startIndex:5])
+	if len(hash) >= 5+startIndex {
+		hashString := hex.EncodeToString(hash[startIndex : 5+startIndex])
 		return hashString
 	}
 	return "Unable to hash with current configuration"
