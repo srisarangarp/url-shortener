@@ -49,14 +49,14 @@ func ShortenURL(c *gin.Context) {
 		urlStoreObjectInverse[hashString] = url
 		err = WriteObjectToFile(urlStoreObject, "urls-storage.yaml")
 		if err != nil {
-			fmt.Println("An Error Occured while writing the map objects to file for URLStore object", err.Error())
+			fmt.Printf("An Error Occured while writing the map objects to file for URLStore object %s", err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
 			return
 		}
 
 		err = WriteObjectToFile(urlStoreObjectInverse, "urls-storage-inverse.yaml")
 		if err != nil {
-			fmt.Println("An Error Occured while writing the map objects to file for Inverse URLStore object", err.Error())
+			fmt.Printf("An Error Occured while writing the map objects to file for Inverse URLStore object %s", err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
 			return
 		}
@@ -84,7 +84,6 @@ func getObjectMap(path string) (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(string(yamlFile))
 
 	err = yaml.Unmarshal(yamlFile, &urlStoreObject)
 	if err != nil {

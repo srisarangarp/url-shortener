@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-	//fmt.Println(shortenURL("https://www.google.com"))
 	r := gin.Default()
 	welcomeMessage := "Welcome to the URL Shortener please send your url to the /url path"
 	r.GET("/", func(c *gin.Context) {
