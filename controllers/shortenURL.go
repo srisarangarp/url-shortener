@@ -7,12 +7,15 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	template "net/url"
+
 	"github.com/gin-gonic/gin"
 	"gopkg.in/yaml.v2"
 )
 
 func ShortenURL(c *gin.Context) {
 	url := c.PostForm("url")
+
 	urlStoreObject, err := getObjectMap("urls-storage.yaml")
 	if err != nil {
 		fmt.Printf("An Error occured in getting the mapObject from yaml file %s", err.Error())
@@ -21,7 +24,7 @@ func ShortenURL(c *gin.Context) {
 	}
 
 	if hashString, exists := lookForString(urlStoreObject, url); exists {
-		c.JSON(http.StatusOK, gin.H{"shorten_URL": hashString})
+		c.JSON(http.StatusOK, gin.H{"shorten_URL": returnCompleteShortenURL(hashString)})
 		return
 	}
 	indexValue := 0
@@ -53,7 +56,7 @@ func ShortenURL(c *gin.Context) {
 		break
 
 	}
-	c.JSON(http.StatusOK, gin.H{"shorten_URL": hashString})
+	c.JSON(http.StatusOK, gin.H{"shorten_URL": returnCompleteShortenURL(hashString)})
 
 }
 
@@ -104,4 +107,10 @@ func WriteObjectToFile(urlStoreObject map[string]string, path string) error {
 		return err
 	}
 	return nil
+}
+func returnCompleteShortenURL(shortenURL string) string {
+	myURLtemplate := "https://infc.com/here-is-the-shorten-url"
+	url, _ := template.Parse(myURLtemplate)
+	url.Path = shortenURL
+	return url.String()
 }
