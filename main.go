@@ -22,20 +22,35 @@ func shortenURL(str string) string {
 		return err.Error()
 	}
 
-	if hashString, exists := lookForURL(urlStoreObject, str); exists {
+	if hashString, exists := lookForString(urlStoreObject, str); exists {
 		return hashString
 	}
+	indexValue := 0
+	var hashString string
+	for {
+		hashString := generateHashString(str, 0)
+		urlStoreObjectInverse, err := getObjectMap("urls-storage-inverse.yaml")
 
-	hashString := generateHashString(str, 0)
-	urlStoreObject[str] = hashString
-	data, err := yaml.Marshal(urlStoreObject)
-	if err != nil {
-		fmt.Printf("An Error occured in marshalling the map object %s", err.Error())
-	}
+		if _, exists := lookForString(urlStoreObjectInverse, str); exists {
+			indexValue++
+			continue
+		}
 
-	err = ioutil.WriteFile("urls-storage.yaml", data, 0644)
-	if err != nil {
-		fmt.Printf("An Error occured in writing the map data to yaml file %s", err.Error())
+		urlStoreObject[str] = hashString
+		urlStoreObjectInverse[hashString] = str
+		err = WriteObjectToFile(urlStoreObject, "urls-storage.yaml")
+		if err != nil {
+			fmt.Println("An Error Occured while writing the map objects to file for URLStore object", err.Error())
+			return err.Error()
+		}
+
+		err = WriteObjectToFile(urlStoreObjectInverse, "urls-storage-inverse.yaml")
+		if err != nil {
+			fmt.Println("An Error Occured while writing the map objects to file for Inverse URLStore object", err.Error())
+			return err.Error()
+		}
+		break
+
 	}
 	return hashString
 
@@ -44,8 +59,12 @@ func shortenURL(str string) string {
 func generateHashString(str string, startIndex int) string {
 	data := []byte(str)
 	hash := sha256.Sum256(data)
-	hashString := hex.EncodeToString(hash[startIndex:7])
-	return hashString
+	if len(hash) >= 5 {
+		hashString := hex.EncodeToString(hash[startIndex:5])
+		return hashString
+	}
+	return "Unable to hash with current configuration"
+
 }
 
 func getObjectMap(path string) (map[string]string, error) {
@@ -64,9 +83,24 @@ func getObjectMap(path string) (map[string]string, error) {
 
 }
 
-func lookForURL(urlStoreObject map[string]string, url string) (string, bool) {
+func lookForString(urlStoreObject map[string]string, url string) (string, bool) {
 	if val, exists := urlStoreObject[url]; exists {
 		return val, exists
 	}
 	return "", false
+}
+
+func WriteObjectToFile(urlStoreObject map[string]string, path string) error {
+	data, err := yaml.Marshal(urlStoreObject)
+	if err != nil {
+		fmt.Printf("An Error occured in marshalling the map object %s", err.Error())
+		return err
+	}
+
+	err = ioutil.WriteFile(path, data, 0644)
+	if err != nil {
+		fmt.Printf("An Error occured in writing the map data to yaml file %s", err.Error())
+		return err
+	}
+	return nil
 }
