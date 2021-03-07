@@ -31,7 +31,7 @@ func ShortenURL(c *gin.Context) {
 	var hashString string
 	for {
 
-		hashString = generateHashString(url, 0)
+		hashString = generateHashString(url, indexValue)
 		urlStoreObjectInverse, err := getObjectMap("urls-storage-inverse.yaml")
 		if err != nil {
 			fmt.Printf("An Error occured in getting the mapObject from yaml file %s", err.Error())
