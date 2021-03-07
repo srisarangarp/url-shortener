@@ -8,7 +8,7 @@ you call pull the image from [docker](https://hub.docker.com/repository/docker/s
 docker pull sreesa7144/url-shortener:latest
 docker run -d -p 8080:8080 sreesa7144/url-shortener:latest
 #You can run the curl command by passing the url as form data like this
-curl -X POST -F 'url=<Enter url to shorten here>' localhost:16686/url
+curl -X POST -F 'url=<Enter url to shorten here>' localhost:8080/url
 ```
 
 ## Output
