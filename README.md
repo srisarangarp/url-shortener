@@ -1,4 +1,4 @@
-# prerequisites
+# Prerequisites
 Foundation DB version 6.2.30 needs to be configured locally, to make this work!!
 
 # URL - shortener
