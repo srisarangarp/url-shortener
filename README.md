@@ -1,3 +1,6 @@
+# prerequisites
+Foundation DB version 6.2.30 needs to be configured locally, to make this work!!
+
 # URL - shortener
 This application can be used to shorten the given URL
 
