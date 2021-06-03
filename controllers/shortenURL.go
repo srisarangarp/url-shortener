@@ -5,65 +5,59 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 
 	template "net/url"
+
+	_ "github.com/apple/foundationdb/bindings/go/src/fdb"
+	_ "github.com/apple/foundationdb/bindings/go/src/fdb/subspace"
+	"github.com/srisarangarp/url-shortener/foundationdb"
 
 	"github.com/gin-gonic/gin"
 	"gopkg.in/yaml.v2"
 )
 
+var dbObject *foundationdb.FdbWrapper
+
+func SetDbObject(object *foundationdb.FdbWrapper) {
+	dbObject = object
+}
 func ShortenURL(c *gin.Context) {
 	url := c.PostForm("url")
 
-	urlStoreObject, err := getObjectMap("urls-storage.yaml")
-	if err != nil {
-		fmt.Printf("An Error occured in getting the mapObject from yaml file %s", err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
-		return
-	}
-
-	if hashString, exists := lookForString(urlStoreObject, url); exists {
+	if hashString, err, exists := dbObject.GetFromUrlMatch(url); exists && hashString != "" {
+		if err != nil {
+			fmt.Printf("An Error occured in getting the urlmatch subspace %s", err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
+			return
+		}
 		c.JSON(http.StatusOK, gin.H{"shorten_URL": returnCompleteShortenURL(hashString)})
 		return
 	}
 	indexValue := 0
-	var hashString string
+	var hashedString string
 	for {
 
-		hashString = generateHashString(url, indexValue)
-		urlStoreObjectInverse, err := getObjectMap("urls-storage-inverse.yaml")
-		if err != nil {
-			fmt.Printf("An Error occured in getting the mapObject from yaml file %s", err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
-			return
-		}
+		hashedString = generateHashString(url, indexValue)
 
-		//In case of collision
-		if _, exists := lookForString(urlStoreObjectInverse, hashString); exists {
+		if exists, err := dbObject.LookIntoHasCodeMatch(hashedString); exists {
+			if err != nil {
+				fmt.Printf("An Error occured in getting the mapObject from yaml file %s", err.Error())
+				c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
+				return
+			}
 			indexValue++
 			continue
 		}
 
-		urlStoreObject[url] = hashString
-		urlStoreObjectInverse[hashString] = url
-		err = WriteObjectToFile(urlStoreObject, "urls-storage.yaml")
-		if err != nil {
-			fmt.Printf("An Error Occured while writing the map objects to file for URLStore object %s", err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
-			return
-		}
-
-		err = WriteObjectToFile(urlStoreObjectInverse, "urls-storage-inverse.yaml")
-		if err != nil {
-			fmt.Printf("An Error Occured while writing the map objects to file for Inverse URLStore object %s", err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
-			return
-		}
+		dbObject.InsertIntoUrlMatch(url, hashedString)
+		dbObject.InsertIntoHashCodeMatch(hashedString, url)
+		log.Println("The Hashed string is ", hashedString)
 		break
 
 	}
-	c.JSON(http.StatusOK, gin.H{"shorten_URL": returnCompleteShortenURL(hashString)})
+	c.JSON(http.StatusOK, gin.H{"shorten_URL": returnCompleteShortenURL(hashedString)})
 
 }
 
