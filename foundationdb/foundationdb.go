@@ -28,7 +28,7 @@ func (fdbObject *FdbWrapper) CreateDb(firstSpace string, secondSpace string) {
 	fdbObject.db.Options().SetTransactionTimeout(60000)
 	fdbObject.db.Options().SetTransactionRetryLimit(100)
 
-	schedulingDir, err := directory.CreateOrOpen(fdbObject.db, []string{"scheduling"}, nil)
+	schedulingDir, err := directory.CreateOrOpen(fdbObject.db, []string{"urlShortner"}, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
