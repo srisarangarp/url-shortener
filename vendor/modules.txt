@@ -4,8 +4,6 @@ github.com/apple/foundationdb/bindings/go/src/fdb
 github.com/apple/foundationdb/bindings/go/src/fdb/directory
 github.com/apple/foundationdb/bindings/go/src/fdb/subspace
 github.com/apple/foundationdb/bindings/go/src/fdb/tuple
-# github.com/ghodss/yaml v1.0.0
-## explicit
 # github.com/gin-contrib/sse v0.1.0
 github.com/gin-contrib/sse
 # github.com/gin-gonic/gin v1.6.3

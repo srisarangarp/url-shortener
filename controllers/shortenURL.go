@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -15,7 +14,6 @@ import (
 	"github.com/srisarangarp/url-shortener/foundationdb"
 
 	"github.com/gin-gonic/gin"
-	"gopkg.in/yaml.v2"
 )
 
 var dbObject *foundationdb.FdbWrapper
@@ -72,42 +70,42 @@ func generateHashString(str string, startIndex int) string {
 
 }
 
-func getObjectMap(path string) (map[string]string, error) {
-	urlStoreObject := make(map[string]string)
-	yamlFile, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
+// func getObjectMap(path string) (map[string]string, error) {
+// 	urlStoreObject := make(map[string]string)
+// 	yamlFile, err := ioutil.ReadFile(path)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	err = yaml.Unmarshal(yamlFile, &urlStoreObject)
-	if err != nil {
-		return nil, err
-	}
-	return urlStoreObject, nil
+// 	err = yaml.Unmarshal(yamlFile, &urlStoreObject)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return urlStoreObject, nil
 
-}
+// }
 
-func lookForString(urlStoreObject map[string]string, url string) (string, bool) {
-	if val, exists := urlStoreObject[url]; exists {
-		return val, exists
-	}
-	return "", false
-}
+// func lookForString(urlStoreObject map[string]string, url string) (string, bool) {
+// 	if val, exists := urlStoreObject[url]; exists {
+// 		return val, exists
+// 	}
+// 	return "", false
+// }
 
-func WriteObjectToFile(urlStoreObject map[string]string, path string) error {
-	data, err := yaml.Marshal(urlStoreObject)
-	if err != nil {
-		fmt.Printf("An Error occured in marshalling the map object %s", err.Error())
-		return err
-	}
+// func WriteObjectToFile(urlStoreObject map[string]string, path string) error {
+// 	data, err := yaml.Marshal(urlStoreObject)
+// 	if err != nil {
+// 		fmt.Printf("An Error occured in marshalling the map object %s", err.Error())
+// 		return err
+// 	}
 
-	err = ioutil.WriteFile(path, data, 0644)
-	if err != nil {
-		fmt.Printf("An Error occured in writing the map data to yaml file %s", err.Error())
-		return err
-	}
-	return nil
-}
+// 	err = ioutil.WriteFile(path, data, 0644)
+// 	if err != nil {
+// 		fmt.Printf("An Error occured in writing the map data to yaml file %s", err.Error())
+// 		return err
+// 	}
+// 	return nil
+// }
 func returnCompleteShortenURL(shortenURL string) string {
 	myURLtemplate := "https://infc.com/here-is-the-shorten-url"
 	url, _ := template.Parse(myURLtemplate)
